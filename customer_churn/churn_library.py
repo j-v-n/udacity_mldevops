@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import shap
 # import sklearn models
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, plot_roc_curve
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -223,6 +223,22 @@ def feature_importance_plot(model, X_data, output_pth):
     plt.tight_layout()
     plt.savefig(output_pth + "/feature_importances.png")
 
+# def plot_rocs(model, X_data, y_data, ax, alpha=0.8):
+#     """
+#     creates and stores the roc curves in output_pth
+#     input:
+#             model: model object
+#             X_data: pandas dataframe of X values
+#             y_data: ground truth dataframe
+#             ax: matplotlib axis object
+#             alpha: transparency value
+
+#     output:
+#             model_plot: model plot object
+#     """
+#     model_plot = plot_roc_curve(model,X_data,y_data,ax=ax,alpha=alpha)
+#     return model_plot
+
 
 def train_models(X_train, X_test, y_train, y_test):
     """
@@ -261,6 +277,14 @@ def train_models(X_train, X_test, y_train, y_test):
         y_test_preds_rf)
     feature_importance_plot(cv_rfc.best_estimator_,
                             X_test, "./images/results/")
+    # create and save roc curves
+    lrc_plot = plot_roc_curve(lrc, X_test, y_test)
+    plt.figure(figsize=(15, 8))
+    ax = plt.gca()
+    rfc_curve = plot_roc_curve(
+        cv_rfc.best_estimator_, X_test, y_test, ax=ax, alpha=0.8)
+    lrc_plot.plot(ax=ax, alpha=0.8)
+    plt.savefig("./images/results/roc_curves.png")
 
     # save models
     joblib.dump(cv_rfc.best_estimator_, "./models/rfc_model.pkl")
